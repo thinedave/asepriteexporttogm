@@ -153,6 +153,18 @@ fl:write(data.piggyback_name)
 fl = io.open(targetFPSPath, "w")
 fl:write(data.fps_target)
 
+local piggybackUUID = ""
+
+for _, v in pairs(file.listFiles(file.joinPath(spritesPath, data.piggyback_name))) do
+    if(v:sub(-4) == ".png") then
+        piggybackUUID = v:sub(1, -5)
+
+        break
+
+    end
+
+end
+
 for index, tag in ipairs(spr.tags) do
     file.makeDirectory(file.joinPath(spritesPath, data.sprite_name.."_"..tag.name))
 
@@ -258,7 +270,7 @@ for index, tag in ipairs(spr.tags) do
     for i, v in pairs(tagFrames) do
         for k = 1, v.duration*60 do
             yystr = yystr..[[
-            {"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"1.0","Channels":{"0":{"resourceType":"SpriteFrameKeyframe","resourceVersion":"1.0","Id":{"name":"747533ea-ae03-4b96-a5ed-41075bf4191e","path":"sprites/]]..data.piggyback_name..[[/]]..data.piggyback_name..[[.yy",},},},"Disabled":false,"id":"747533ea-ae03-4b96-a5ed-41075bf4191e","IsCreationKey":false,"Key":]]..fuck..[[.0,"Length":1.0,"Stretch":false,},
+            {"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"1.0","Channels":{"0":{"resourceType":"SpriteFrameKeyframe","resourceVersion":"1.0","Id":{"name":"]]..piggybackUUID..[[","path":"sprites/]]..data.piggyback_name..[[/]]..data.piggyback_name..[[.yy",},},},"Disabled":false,"id":"]]..piggybackUUID..[[","IsCreationKey":false,"Key":]]..fuck..[[.0,"Length":1.0,"Stretch":false,},
             ]]
             fuck = fuck + 1
         end
