@@ -51,13 +51,11 @@ local configPath = file.joinPath(file.userConfigPath, "exporttogm", "gms2project
 local spriteNamePath = file.joinPath(file.userConfigPath, "exporttogm", "gms2spritename.txt")
 local projectNamePath = file.joinPath(file.userConfigPath, "exporttogm", "gms2projectname.txt")
 local piggyBackPath = file.joinPath(file.userConfigPath, "exporttogm", "gms2piggybackname.txt")
-local targetFPSPath = file.joinPath(file.userConfigPath, "exporttogm", "gms2fpstarget.txt")
 local projectPath = ""
 local spritesPath = ""
 local piggyBackName = ""
 local spriteName = ""
 local projectName = ""
-local fpsTarget = ""
 
 if(file.isFile(configPath)) then
     local fl = io.open(configPath, "r")
@@ -87,13 +85,6 @@ if(file.isFile(projectNamePath)) then
 
 end
 
-if(file.isFile(targetFPSPath)) then
-    local fl = io.open(targetFPSPath, "r")
-
-    fpsTarget = fl:read()
-
-end
-
 local data = Dialog():entry{
     id = "project_name",
     label = "GMS2 Project Name",
@@ -116,12 +107,6 @@ local data = Dialog():entry{
     id = "piggyback_name",
     label = "Piggyback Sprite Name",
     text = piggyBackName,
-    focus = true,
-
-}:entry{
-    id = "fps_target",
-    label = "Game FPS",
-    text = fpsTarget,
     focus = true,
 
 }:button{
@@ -150,8 +135,6 @@ fl = io.open(projectNamePath, "w")
 fl:write(data.project_name)
 fl = io.open(piggyBackPath, "w")
 fl:write(data.piggyback_name)
-fl = io.open(targetFPSPath, "w")
-fl:write(data.fps_target)
 
 local piggybackUUID = ""
 
@@ -188,6 +171,20 @@ for index, tag in ipairs(spr.tags) do
 
     end
 
+    local lowestDuration = -1
+
+    for _, v in ipairs(tagsprite.frames) do
+        if(lowestDuration == -1) then lowestDuration = v.duration end
+
+        if(lowestDuration > v.duration) then
+            lowestDuration = v.duration
+
+        end
+
+    end
+
+    data.fps_target = 1000/(lowestDuration*1000)
+
     local pth = file.joinPath(spritesPath, data.sprite_name.."_"..tag.name, "frame0.png")
 
     tagsprite:saveCopyAs(pth)
@@ -213,8 +210,8 @@ for index, tag in ipairs(spr.tags) do
     ]]
 
     for i, v in pairs(tagFrames) do
-        print(v.duration*60)
-        for k = 1, v.duration*60 do
+        print(v.duration*data.fps_target)
+        for k = 1, v.duration*data.fps_target do
             yystr = yystr..[[
             {"resourceType":"GMSpriteFrame","resourceVersion":"1.1","name":"]].."frame"..(i-1)..[[",},
             ]]
@@ -268,7 +265,7 @@ for index, tag in ipairs(spr.tags) do
     local fuck = 0
 
     for i, v in pairs(tagFrames) do
-        for k = 1, v.duration*60 do
+        for k = 1, v.duration*data.fps_target do
             yystr = yystr..[[
             {"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"1.0","Channels":{"0":{"resourceType":"SpriteFrameKeyframe","resourceVersion":"1.0","Id":{"name":"]]..piggybackUUID..[[","path":"sprites/]]..data.piggyback_name..[[/]]..data.piggyback_name..[[.yy",},},},"Disabled":false,"id":"]]..piggybackUUID..[[","IsCreationKey":false,"Key":]]..fuck..[[.0,"Length":1.0,"Stretch":false,},
             ]]
