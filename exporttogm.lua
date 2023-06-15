@@ -49,13 +49,11 @@ file.makeDirectory(file.joinPath(file.userConfigPath, "exporttogm"))
 
 local configPath = file.joinPath(file.userConfigPath, "exporttogm", "gms2projectpath.txt")
 local spriteNamePath = file.joinPath(file.userConfigPath, "exporttogm", "gms2spritename.txt")
-local projectNamePath = file.joinPath(file.userConfigPath, "exporttogm", "gms2projectname.txt")
 local piggyBackPath = file.joinPath(file.userConfigPath, "exporttogm", "gms2piggybackname.txt")
 local projectPath = ""
 local spritesPath = ""
 local piggyBackName = ""
 local spriteName = ""
-local projectName = ""
 
 if(file.isFile(configPath)) then
     local fl = io.open(configPath, "r")
@@ -78,20 +76,7 @@ if(file.isFile(spriteNamePath)) then
 
 end
 
-if(file.isFile(projectNamePath)) then
-    local fl = io.open(projectNamePath, "r")
-
-    projectName = fl:read()
-
-end
-
 local data = Dialog():entry{
-    id = "project_name",
-    label = "GMS2 Project Name",
-    text = projectName,
-    focus = true,
-
-}:entry{
     id = "project_path",
     label = "GMS2 Project Path",
     text = projectPath,
@@ -120,10 +105,21 @@ local data = Dialog():entry{
 }:show().data
 
 if (not data.confirm) then
-    print("hm")
     return
 
 end
+
+local project_name = ""
+local pathTbl = {}
+
+for str in string.gmatch(data.project_path, "([^\\]+)") do
+    pathTbl[#pathTbl+1] = str
+
+end
+
+project_name = pathTbl[#pathTbl]
+
+print(project_name)
 
 local spritesPath = file.joinPath(data.project_path, "sprites")
 
@@ -131,8 +127,6 @@ local fl = io.open(configPath, "w")
 fl:write(data.project_path)
 fl = io.open(spriteNamePath, "w")
 fl:write(data.sprite_name)
-fl = io.open(projectNamePath, "w")
-fl:write(data.project_name)
 fl = io.open(piggyBackPath, "w")
 fl:write(data.piggyback_name)
 
@@ -152,6 +146,8 @@ for index, tag in ipairs(spr.tags) do
     file.makeDirectory(file.joinPath(spritesPath, data.sprite_name.."_"..tag.name))
 
     local tagFrames = {}
+
+    print(tag.name)
 
     for i, v in ipairs(spr.frames) do
         if(i >= tag.fromFrame.frameNumber and i <= tag.toFrame.frameNumber) then
@@ -173,7 +169,8 @@ for index, tag in ipairs(spr.tags) do
 
     local lowestDuration = -1
 
-    for _, v in ipairs(tagsprite.frames) do
+    for i, v in ipairs(tagFrames) do
+        print(i,v,v.duration)
         if(lowestDuration == -1) then lowestDuration = v.duration end
 
         if(lowestDuration > v.duration) then
@@ -182,6 +179,8 @@ for index, tag in ipairs(spr.tags) do
         end
 
     end
+
+    print(1000/(lowestDuration*1000))
 
     data.fps_target = 1000/(lowestDuration*1000)
 
@@ -231,8 +230,8 @@ for index, tag in ipairs(spr.tags) do
         "nineSlice": null,
         "origin": 7,
         "parent": {
-            "name": "]]..data.project_name..[[",
-            "path": "]]..data.project_name..[[.yyp",
+            "name": "]]..project_name..[[",
+            "path": "]]..project_name..[[.yyp",
         },
         "preMultiplyAlpha": false,
         "sequence": {
@@ -318,7 +317,7 @@ for index, tag in ipairs(spr.tags) do
 
     --resource order
     --this is so fucked up
-    fl = io.open(file.joinPath(data.project_path, data.project_name..".resource_order"), "r")
+    fl = io.open(file.joinPath(data.project_path, project_name..".resource_order"), "r")
     local resourceOrderStr = fl:read("*all")
     local resourceOrderTbl = {}
 
@@ -371,7 +370,7 @@ for index, tag in ipairs(spr.tags) do
 
         print(newResourceOrderStr)
 
-        fl = io.open(file.joinPath(data.project_path, data.project_name..".resource_order"), "w")
+        fl = io.open(file.joinPath(data.project_path, project_name..".resource_order"), "w")
 
         fl:write(newResourceOrderStr)
 
@@ -380,7 +379,7 @@ for index, tag in ipairs(spr.tags) do
     end
 
     --yyp registration
-    fl = io.open(file.joinPath(data.project_path, data.project_name..".yyp"), "r")
+    fl = io.open(file.joinPath(data.project_path, project_name..".yyp"), "r")
     local yypStr = fl:read("*all")
     local yypTbl = {}
 
@@ -433,7 +432,7 @@ for index, tag in ipairs(spr.tags) do
 
         print(newYYPStr)
 
-        fl = io.open(file.joinPath(data.project_path, data.project_name..".yyp"), "w")
+        fl = io.open(file.joinPath(data.project_path, project_name..".yyp"), "w")
 
         fl:write(newYYPStr)
 
